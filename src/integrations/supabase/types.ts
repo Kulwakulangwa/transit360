@@ -14,6 +14,330 @@ export type Database = {
   }
   public: {
     Tables: {
+      border_crossings: {
+        Row: {
+          bl_number: string
+          border_point: string
+          clearance_date: string
+          created_at: string
+          crossing_date: string
+          customs_agent: string
+          direction: string
+          documents: string
+          driver_name: string
+          fees: number
+          hold_reason: string
+          id: string
+          notes: string
+          status: string
+          truck_unit: string
+        }
+        Insert: {
+          bl_number?: string
+          border_point?: string
+          clearance_date?: string
+          created_at?: string
+          crossing_date?: string
+          customs_agent?: string
+          direction?: string
+          documents?: string
+          driver_name?: string
+          fees?: number
+          hold_reason?: string
+          id?: string
+          notes?: string
+          status?: string
+          truck_unit?: string
+        }
+        Update: {
+          bl_number?: string
+          border_point?: string
+          clearance_date?: string
+          created_at?: string
+          crossing_date?: string
+          customs_agent?: string
+          direction?: string
+          documents?: string
+          driver_name?: string
+          fees?: number
+          hold_reason?: string
+          id?: string
+          notes?: string
+          status?: string
+          truck_unit?: string
+        }
+        Relationships: []
+      }
+      claims: {
+        Row: {
+          assigned_to: string
+          bl_number: string
+          claim_amount: number
+          claim_number: string
+          claim_type: string
+          created_at: string
+          currency: string
+          customer_name: string
+          description: string
+          documents: string
+          id: string
+          incident_date: string
+          priority: string
+          reported_date: string
+          resolution_notes: string
+          resolved_date: string
+          settled_amount: number
+          status: string
+        }
+        Insert: {
+          assigned_to?: string
+          bl_number?: string
+          claim_amount?: number
+          claim_number?: string
+          claim_type?: string
+          created_at?: string
+          currency?: string
+          customer_name?: string
+          description?: string
+          documents?: string
+          id?: string
+          incident_date?: string
+          priority?: string
+          reported_date?: string
+          resolution_notes?: string
+          resolved_date?: string
+          settled_amount?: number
+          status?: string
+        }
+        Update: {
+          assigned_to?: string
+          bl_number?: string
+          claim_amount?: number
+          claim_number?: string
+          claim_type?: string
+          created_at?: string
+          currency?: string
+          customer_name?: string
+          description?: string
+          documents?: string
+          id?: string
+          incident_date?: string
+          priority?: string
+          reported_date?: string
+          resolution_notes?: string
+          resolved_date?: string
+          settled_amount?: number
+          status?: string
+        }
+        Relationships: []
+      }
+      containers: {
+        Row: {
+          arrival_date: string
+          bl_number: string
+          container_number: string
+          created_at: string
+          departure_date: string
+          id: string
+          location: string
+          notes: string
+          owner: string
+          seal_number: string
+          status: string
+          type: string
+        }
+        Insert: {
+          arrival_date?: string
+          bl_number?: string
+          container_number: string
+          created_at?: string
+          departure_date?: string
+          id?: string
+          location?: string
+          notes?: string
+          owner?: string
+          seal_number?: string
+          status?: string
+          type?: string
+        }
+        Update: {
+          arrival_date?: string
+          bl_number?: string
+          container_number?: string
+          created_at?: string
+          departure_date?: string
+          id?: string
+          location?: string
+          notes?: string
+          owner?: string
+          seal_number?: string
+          status?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      costs: {
+        Row: {
+          amount: number
+          bl_number: string
+          category: string
+          cost_type: string
+          created_at: string
+          currency: string
+          id: string
+          notes: string
+          paid_by: string
+          payment_date: string
+          payment_reference: string
+          payment_status: string
+          vendor: string
+          vendor_invoice: string
+        }
+        Insert: {
+          amount?: number
+          bl_number?: string
+          category?: string
+          cost_type?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string
+          paid_by?: string
+          payment_date?: string
+          payment_reference?: string
+          payment_status?: string
+          vendor?: string
+          vendor_invoice?: string
+        }
+        Update: {
+          amount?: number
+          bl_number?: string
+          category?: string
+          cost_type?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string
+          paid_by?: string
+          payment_date?: string
+          payment_reference?: string
+          payment_status?: string
+          vendor?: string
+          vendor_invoice?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          address: string
+          city: string
+          company_name: string
+          contact_person: string
+          country: string
+          created_at: string
+          credit_limit: number
+          current_balance: number
+          customer_type: string
+          email: string
+          id: string
+          notes: string
+          payment_terms: string
+          phone: string
+          status: string
+          total_shipments: number
+        }
+        Insert: {
+          address?: string
+          city?: string
+          company_name: string
+          contact_person?: string
+          country?: string
+          created_at?: string
+          credit_limit?: number
+          current_balance?: number
+          customer_type?: string
+          email?: string
+          id?: string
+          notes?: string
+          payment_terms?: string
+          phone?: string
+          status?: string
+          total_shipments?: number
+        }
+        Update: {
+          address?: string
+          city?: string
+          company_name?: string
+          contact_person?: string
+          country?: string
+          created_at?: string
+          credit_limit?: number
+          current_balance?: number
+          customer_type?: string
+          email?: string
+          id?: string
+          notes?: string
+          payment_terms?: string
+          phone?: string
+          status?: string
+          total_shipments?: number
+        }
+        Relationships: []
+      }
+      drivers: {
+        Row: {
+          created_at: string
+          current_assignment: string
+          current_location: string
+          email: string
+          full_name: string
+          id: string
+          id_number: string
+          license_expiry: string
+          license_number: string
+          medical_expiry: string
+          nationality: string
+          notes: string
+          phone: string
+          status: string
+          total_trips: number
+        }
+        Insert: {
+          created_at?: string
+          current_assignment?: string
+          current_location?: string
+          email?: string
+          full_name: string
+          id?: string
+          id_number?: string
+          license_expiry?: string
+          license_number?: string
+          medical_expiry?: string
+          nationality?: string
+          notes?: string
+          phone?: string
+          status?: string
+          total_trips?: number
+        }
+        Update: {
+          created_at?: string
+          current_assignment?: string
+          current_location?: string
+          email?: string
+          full_name?: string
+          id?: string
+          id_number?: string
+          license_expiry?: string
+          license_number?: string
+          medical_expiry?: string
+          nationality?: string
+          notes?: string
+          phone?: string
+          status?: string
+          total_trips?: number
+        }
+        Relationships: []
+      }
       fleet_units: {
         Row: {
           created_at: string
@@ -98,6 +422,72 @@ export type Database = {
         }
         Relationships: []
       }
+      pods: {
+        Row: {
+          bl_number: string
+          condition_notes: string
+          created_at: string
+          customer_name: string
+          delivery_date: string
+          destination: string
+          file_reference: string
+          id: string
+          notes: string
+          origin: string
+          pod_status: string
+          recipient_name: string
+          recipient_signature: string
+          rejection_reason: string
+          shipment_ref: string
+          uploaded_at: string
+          uploaded_by: string
+          verified_at: string
+          verified_by: string
+        }
+        Insert: {
+          bl_number?: string
+          condition_notes?: string
+          created_at?: string
+          customer_name?: string
+          delivery_date?: string
+          destination?: string
+          file_reference?: string
+          id?: string
+          notes?: string
+          origin?: string
+          pod_status?: string
+          recipient_name?: string
+          recipient_signature?: string
+          rejection_reason?: string
+          shipment_ref?: string
+          uploaded_at?: string
+          uploaded_by?: string
+          verified_at?: string
+          verified_by?: string
+        }
+        Update: {
+          bl_number?: string
+          condition_notes?: string
+          created_at?: string
+          customer_name?: string
+          delivery_date?: string
+          destination?: string
+          file_reference?: string
+          id?: string
+          notes?: string
+          origin?: string
+          pod_status?: string
+          recipient_name?: string
+          recipient_signature?: string
+          rejection_reason?: string
+          shipment_ref?: string
+          uploaded_at?: string
+          uploaded_by?: string
+          verified_at?: string
+          verified_by?: string
+        }
+        Relationships: []
+      }
       shipments: {
         Row: {
           bl_number: string
@@ -164,6 +554,54 @@ export type Database = {
           status?: string
           transporter?: string
           weight?: string
+        }
+        Relationships: []
+      }
+      tracking_events: {
+        Row: {
+          bl_number: string
+          created_at: string
+          description: string
+          driver_name: string
+          event_type: string
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          recorded_at: string
+          shipment_ref: string
+          status: string
+          truck_unit: string
+        }
+        Insert: {
+          bl_number?: string
+          created_at?: string
+          description?: string
+          driver_name?: string
+          event_type?: string
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          recorded_at?: string
+          shipment_ref?: string
+          status?: string
+          truck_unit?: string
+        }
+        Update: {
+          bl_number?: string
+          created_at?: string
+          description?: string
+          driver_name?: string
+          event_type?: string
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          recorded_at?: string
+          shipment_ref?: string
+          status?: string
+          truck_unit?: string
         }
         Relationships: []
       }

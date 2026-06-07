@@ -53,6 +53,15 @@ export function Borders() {
     }
   }
 
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this border crossing?')) return;
+    const { error } = await supabase.from('border_crossings').delete().eq('id', id);
+    if (!error) {
+      setCrossings(prev => prev.filter(c => c.id !== id));
+      setSelected(null);
+    }
+  }
+
   const filtered = crossings.filter(c => {
     const matchStatus = statusFilter === 'All' || c.status === statusFilter;
     const matchDir = directionFilter === 'All' || c.direction === directionFilter;
@@ -78,7 +87,10 @@ export function Borders() {
                 <h3 className="text-sm font-semibold text-gray-900">{selected.border_point}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">BL # {selected.bl_number}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleDelete(selected.id)} className="text-xs text-red-600 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50"><i className="ti ti-trash mr-1" />Delete</button>
+                <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 mb-4">

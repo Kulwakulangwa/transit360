@@ -73,6 +73,15 @@ export function Claims() {
     if (!error) { setShowAdd(false); fetchClaims(); }
   }
 
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this claim?')) return;
+    const { error } = await supabase.from('claims').delete().eq('id', id);
+    if (!error) {
+      setClaims(prev => prev.filter(c => c.id !== id));
+      setSelected(null);
+    }
+  }
+
   return (
     <div className="p-4">
       {showAdd && <AddClaimModal onClose={() => setShowAdd(false)} onAdd={handleAddClaim} />}
@@ -85,7 +94,10 @@ export function Claims() {
                 <h3 className="text-sm font-semibold text-gray-900">{selected.claim_number}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{selected.customer_name}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleDelete(selected.id)} className="text-xs text-red-600 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50"><i className="ti ti-trash mr-1" />Delete</button>
+                <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 mb-4">

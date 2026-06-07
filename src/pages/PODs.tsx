@@ -57,6 +57,15 @@ export function PODs() {
     }
   }
 
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this POD?')) return;
+    const { error } = await supabase.from('pods').delete().eq('id', id);
+    if (!error) {
+      setPODs(prev => prev.filter(p => p.id !== id));
+      setSelected(null);
+    }
+  }
+
   const filtered = pods.filter(p => {
     const matchStatus = statusFilter === 'All' || p.pod_status === statusFilter;
     const q = search.toLowerCase();
@@ -81,7 +90,10 @@ export function PODs() {
                 <h3 className="text-sm font-semibold text-gray-900">POD Details</h3>
                 <p className="text-xs text-gray-500 mt-0.5">BL # {selected.bl_number}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleDelete(selected.id)} className="text-xs text-red-600 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50"><i className="ti ti-trash mr-1" />Delete</button>
+                <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 mb-4">

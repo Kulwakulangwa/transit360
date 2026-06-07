@@ -14,7 +14,159 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fleet_units: {
+        Row: {
+          created_at: string
+          driver_initials: string
+          driver_name: string
+          gps_last_seen: string
+          id: string
+          incidents: Json
+          location: string
+          next_maintenance: string
+          owner_id: string
+          status: string
+          total_trips: number
+          trip_history: Json
+          unit_number: string
+        }
+        Insert: {
+          created_at?: string
+          driver_initials?: string
+          driver_name?: string
+          gps_last_seen?: string
+          id?: string
+          incidents?: Json
+          location?: string
+          next_maintenance?: string
+          owner_id: string
+          status?: string
+          total_trips?: number
+          trip_history?: Json
+          unit_number: string
+        }
+        Update: {
+          created_at?: string
+          driver_initials?: string
+          driver_name?: string
+          gps_last_seen?: string
+          id?: string
+          incidents?: Json
+          location?: string
+          next_maintenance?: string
+          owner_id?: string
+          status?: string
+          total_trips?: number
+          trip_history?: Json
+          unit_number?: string
+        }
+        Relationships: []
+      }
+      incidents: {
+        Row: {
+          bl_number: string
+          created_at: string
+          description: string
+          id: string
+          owner_id: string
+          reported_at: string
+          resolved: boolean
+          severity: string
+          title: string
+        }
+        Insert: {
+          bl_number?: string
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id: string
+          reported_at?: string
+          resolved?: boolean
+          severity?: string
+          title: string
+        }
+        Update: {
+          bl_number?: string
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id?: string
+          reported_at?: string
+          resolved?: boolean
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      shipments: {
+        Row: {
+          bl_number: string
+          containers: string
+          cost_customs: number
+          cost_detention: number
+          cost_fuel: number
+          created_at: string
+          customs_uploaded: boolean
+          destination: string
+          detention_cost: number
+          driver: string
+          eta: string
+          id: string
+          invoice_uploaded: boolean
+          notes: string
+          origin: string
+          owner_id: string
+          pod_uploaded: boolean
+          status: string
+          transporter: string
+          weight: string
+        }
+        Insert: {
+          bl_number: string
+          containers?: string
+          cost_customs?: number
+          cost_detention?: number
+          cost_fuel?: number
+          created_at?: string
+          customs_uploaded?: boolean
+          destination?: string
+          detention_cost?: number
+          driver?: string
+          eta?: string
+          id?: string
+          invoice_uploaded?: boolean
+          notes?: string
+          origin?: string
+          owner_id: string
+          pod_uploaded?: boolean
+          status?: string
+          transporter?: string
+          weight?: string
+        }
+        Update: {
+          bl_number?: string
+          containers?: string
+          cost_customs?: number
+          cost_detention?: number
+          cost_fuel?: number
+          created_at?: string
+          customs_uploaded?: boolean
+          destination?: string
+          detention_cost?: number
+          driver?: string
+          eta?: string
+          id?: string
+          invoice_uploaded?: boolean
+          notes?: string
+          origin?: string
+          owner_id?: string
+          pod_uploaded?: boolean
+          status?: string
+          transporter?: string
+          weight?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

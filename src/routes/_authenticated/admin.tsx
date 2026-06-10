@@ -10,7 +10,7 @@ import {
   removeTeamMember,
   updateMemberRole,
 } from "@/lib/admin.functions";
-import { useHasRole, type AppRole } from "@/hooks/use-roles";
+import { useHasRole, useMyRoles, type AppRole } from "@/hooks/use-roles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -59,19 +59,51 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 function AdminPage() {
-  const { allowed, isLoading } = useHasRole("admin");
+  const { allowed, isLoading, roles } = useHasRole("admin");
+  const { data, error } = useMyRoles();
 
   if (isLoading) {
     return <div className="p-8 text-muted-foreground">Loading…</div>;
   }
   if (!allowed) {
+    const errMsg = (error as Error | undefined)?.message;
+    const looksLikeEnvIssue =
+      errMsg && /Missing Supabase environment|SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_PUBLISHABLE_KEY|Unauthorized/i.test(errMsg);
     return (
-      <div className="p-8">
+      <div className="p-8 space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Access denied</CardTitle>
-            <CardDescription>You need the admin role to manage team access.</CardDescription>
+            <CardDescription>
+              You need the admin role to manage team access.
+            </CardDescription>
           </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div><span className="text-muted-foreground">Detected roles:</span> {roles.length ? roles.join(", ") : <em>none</em>}</div>
+            {errMsg && (
+              <div className="rounded border border-destructive/30 bg-destructive/5 p-3 text-destructive">
+                <div className="font-medium">Role lookup failed</div>
+                <div className="font-mono text-xs mt-1 break-all">{errMsg}</div>
+                {looksLikeEnvIssue && (
+                  <div className="mt-2 text-foreground">
+                    This is a deployment configuration problem, not a permission problem.
+                    Add the missing server-side environment variables in Vercel (Settings → Environment Variables) and redeploy:
+                    <ul className="list-disc pl-5 mt-1">
+                      <li><code>SUPABASE_URL</code></li>
+                      <li><code>SUPABASE_PUBLISHABLE_KEY</code></li>
+                      <li><code>SUPABASE_SERVICE_ROLE_KEY</code> (server-only — never prefix with VITE_)</li>
+                      <li><code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_PUBLISHABLE_KEY</code>, <code>VITE_SUPABASE_PROJECT_ID</code></li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+            {!errMsg && data && (
+              <div className="text-muted-foreground">
+                The server returned roles but none of them is <code>admin</code>. Have an admin grant it via the team page.
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
     );

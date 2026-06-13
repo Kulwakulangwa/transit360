@@ -7,16 +7,18 @@ interface Props {
   shipments: Shipment[];
   onAdd: (s: Shipment) => void;
   onUpdateStatus: (id: string, status: ShipmentStatus) => void;
+  onDelete: (id: string) => void;  // <-- added for delete
 }
 
 const STATUSES: ShipmentStatus[] = ['In Transit', 'Delayed', 'Border Hold', 'Delivered', 'Loading'];
 const FILTERS = ['All', ...STATUSES];
 
-export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
+export function Shipments({ shipments, onAdd, onUpdateStatus, onDelete }: Props) {
   const [filter, setFilter] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Shipment | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Shipment | null>(null);  // <-- added
 
   const filtered = shipments.filter(s => {
     const matchStatus = filter === 'All' || s.status === filter;
@@ -32,10 +34,49 @@ export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
     setSelected(prev => prev?.id === id ? { ...prev, status: status as ShipmentStatus } : prev);
   }
 
+  function handleDeleteConfirm() {
+    if (deleteTarget) {
+      onDelete(deleteTarget.id);
+      setDeleteTarget(null);
+      // If the deleted shipment was open in the detail panel, close it
+      if (selected?.id === deleteTarget.id) setSelected(null);
+    }
+  }
+
   return (
     <div className="p-4">
       {showAdd && <AddShipmentModal onClose={() => setShowAdd(false)} onAdd={s => { onAdd(s); setShowAdd(false); }} />}
 
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={e => { if (e.target === e.currentTarget) setDeleteTarget(null); }}>
+          <div className="bg-white rounded-xl shadow-xl w-96 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Delete Shipment</h3>
+              <button onClick={() => setDeleteTarget(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+            </div>
+            <p className="text-xs text-gray-600 mb-6">
+              Are you sure you want to delete shipment <span className="font-semibold">{deleteTarget.blNumber}</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Existing detail modal – unchanged */}
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}>
           <div className="bg-white rounded-xl shadow-xl w-[500px] max-h-[85vh] overflow-y-auto p-5">
@@ -43,6 +84,7 @@ export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
               <h3 className="text-sm font-semibold text-gray-900">{selected.blNumber} — {selected.origin} → {selected.destination}</h3>
               <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
             </div>
+            {/* ... rest of the detail panel content – unchanged ... */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               {[['Transporter', selected.transporter || '—'], ['Driver', selected.driver || '—'], ['ETA', selected.eta || '—'], ['Weight', selected.weight || '—'], ['Containers', selected.containers || '—'], ['Detention', selected.detentionCost > 0 ? `$${selected.detentionCost.toLocaleString()}` : 'None']].map(([l, v]) => (
                 <div key={l} className="bg-gray-50 rounded-lg p-2">
@@ -110,6 +152,7 @@ export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
         </div>
       )}
 
+      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="text-sm font-semibold text-gray-900">Shipments</div>
@@ -123,6 +166,7 @@ export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
         </button>
       </div>
 
+      {/* Filters */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <div className="flex gap-1.5">
           {FILTERS.map(f => (
@@ -146,6 +190,7 @@ export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
         </div>
       </div>
 
+      {/* Table */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
@@ -176,12 +221,20 @@ export function Shipments({ shipments, onAdd, onUpdateStatus }: Props) {
                       : <span className="text-gray-300">—</span>}
                   </td>
                   <td className="px-3 py-2.5">
-                    <button
-                      onClick={() => setSelected(s)}
-                      className="flex items-center gap-1 text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
-                    >
-                      <i className="ti ti-file-text text-xs" /> Details
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelected(s)}
+                        className="flex items-center gap-1 text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
+                        <i className="ti ti-file-text text-xs" /> Details
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(s)}
+                        className="flex items-center gap-1 text-xs text-red-600 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                      >
+                        <i className="ti ti-trash text-xs" /> Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

@@ -4,13 +4,14 @@ import { useShipments, useShipmentMutations } from '@/hooks/useData';
 
 export const Route = createFileRoute('/_authenticated/shipments')({
   component: () => {
+    const shipments = useShipments();   // returns array directly
     const m = useShipmentMutations();
     return (
       <Shipments
-        shipments={useShipments()}
+        shipments={shipments}
         onAdd={m.addShipment}
         onUpdateStatus={m.updateShipmentStatus}
-        onDelete={m.deleteShipment}   // <-- add this line
+        onDelete={m.deleteShipment}
       />
     );
   },

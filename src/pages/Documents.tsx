@@ -7,7 +7,7 @@ type DocStatus = 'Draft' | 'Active' | 'Expired' | 'Archived';
 
 const CATEGORIES: ('All' | DocCategory)[] = ['All', 'BL', 'Invoice', 'Customs', 'POD', 'Permit', 'Insurance', 'Other'];
 
-export default function DocumentsPage() {
+export function Documents() { // This is the named export the route expects
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -29,7 +29,7 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     fetchDocuments();
-  }, []);
+  }, [categoryFilter]);
 
   async function fetchDocuments() {
     setLoading(true);
@@ -41,10 +41,6 @@ export default function DocumentsPage() {
     if (!error) setDocuments(data || []);
     setLoading(false);
   }
-
-  useEffect(() => {
-    fetchDocuments();
-  }, [categoryFilter]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;

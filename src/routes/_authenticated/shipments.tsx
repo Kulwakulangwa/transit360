@@ -1,3 +1,4 @@
+// src/routes/_authenticated/shipments.tsx
 import { createFileRoute } from '@tanstack/react-router';
 import { Shipments } from '@/pages/Shipments';
 import { useShipments, useShipmentMutations } from '@/hooks/useData';

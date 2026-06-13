@@ -23,11 +23,13 @@ export async function uploadDocument(
   file: File,
   metadata: Partial<Document>
 ) {
+  // 1. Validate file
   if (file.type !== 'application/pdf')
     throw new Error('Only PDF files are allowed.');
   if (file.size > 25 * 1024 * 1024)
     throw new Error(`File exceeds 25MB (${(file.size / (1024*1024)).toFixed(2)}MB).`);
 
+  // 2. Upload to Supabase Storage
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
   const storagePath = `documents/${metadata.category || 'general'}/${fileName}`;
@@ -37,6 +39,7 @@ export async function uploadDocument(
     .upload(storagePath, file);
   if (uploadError) throw uploadError;
 
+  // 3. Create database record
   const { data: doc, error: dbError } = await supabase
     .from('documents')
     .insert({
@@ -58,6 +61,7 @@ export async function uploadDocument(
     .single();
 
   if (dbError) {
+    // Rollback: delete the uploaded file if database insert fails
     await supabase.storage.from('documents').remove([storagePath]);
     throw dbError;
   }
@@ -65,6 +69,7 @@ export async function uploadDocument(
 }
 
 export async function downloadDocument(documentId: string) {
+  // 1. Get the document record to find the storage path
   const { data: doc, error: fetchError } = await supabase
     .from('documents')
     .select('storage_path, title')
@@ -72,6 +77,7 @@ export async function downloadDocument(documentId: string) {
     .single();
   if (fetchError || !doc?.storage_path) throw new Error('Document not found');
 
+  // 2. Download the file from storage
   const { data, error } = await supabase.storage
     .from('documents')
     .download(doc.storage_path);
@@ -80,6 +86,7 @@ export async function downloadDocument(documentId: string) {
 }
 
 export async function deleteDocument(documentId: string) {
+  // 1. Get the document record to find the storage path
   const { data: doc, error: fetchError } = await supabase
     .from('documents')
     .select('storage_path')
@@ -87,9 +94,12 @@ export async function deleteDocument(documentId: string) {
     .single();
   if (fetchError) throw fetchError;
 
+  // 2. Delete the file from storage
   if (doc.storage_path) {
     await supabase.storage.from('documents').remove([doc.storage_path]);
   }
+
+  // 3. Delete the database record
   const { error: dbError } = await supabase
     .from('documents')
     .delete()

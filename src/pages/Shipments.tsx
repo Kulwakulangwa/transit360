@@ -1,72 +1,24 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState } from 'react';
+import type { Shipment, ShipmentStatus } from '../types';
 import { StatusPill } from '../components/StatusPill';
 import { AddShipmentModal } from '../components/AddShipmentModal';
-import type { Shipment, ShipmentStatus } from '../types';
+
+interface Props {
+  shipments: Shipment[];
+  onAdd: (s: Shipment) => void;
+  onUpdateStatus: (id: string, status: ShipmentStatus) => void;
+  onDelete: (id: string) => void;  // <-- added for delete
+}
 
 const STATUSES: ShipmentStatus[] = ['In Transit', 'Delayed', 'Border Hold', 'Delivered', 'Loading'];
 const FILTERS = ['All', ...STATUSES];
 
-export default function ShipmentsPage() {
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [loading, setLoading] = useState(true);
+export function Shipments({ shipments, onAdd, onUpdateStatus, onDelete }: Props) {
   const [filter, setFilter] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Shipment | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<Shipment | null>(null);
-
-  const loadShipments = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('shipments')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (!error && data) setShipments(data);
-    setLoading(false);
-  };
-
-  useEffect(() => { loadShipments(); }, []);
-
-  const addShipment = async (newShipment: Shipment) => {
-    const { data, error } = await supabase
-      .from('shipments')
-      .insert([newShipment])
-      .select()
-      .single();
-    if (error) {
-      alert('Add failed: ' + error.message);
-      return;
-    }
-    setShipments(prev => [data, ...prev]);
-  };
-
-  const updateShipmentStatus = async (id: string, status: ShipmentStatus) => {
-    const { error } = await supabase
-      .from('shipments')
-      .update({ status })
-      .eq('id', id);
-    if (error) {
-      alert('Update failed: ' + error.message);
-      return;
-    }
-    setShipments(prev => prev.map(s => (s.id === id ? { ...s, status } : s)));
-    if (selected?.id === id) setSelected({ ...selected, status });
-  };
-
-  const deleteShipment = async (id: string) => {
-    const { error } = await supabase
-      .from('shipments')
-      .delete()
-      .eq('id', id);
-    if (error) {
-      alert('Delete failed: ' + error.message);
-      return;
-    }
-    setShipments(prev => prev.filter(s => s.id !== id));
-    if (selected?.id === id) setSelected(null);
-    setDeleteTarget(null);
-  };
+  const [deleteTarget, setDeleteTarget] = useState<Shipment | null>(null);  // <-- added
 
   const filtered = shipments.filter(s => {
     const matchStatus = filter === 'All' || s.status === filter;
@@ -77,14 +29,25 @@ export default function ShipmentsPage() {
 
   const delayed = shipments.filter(s => s.status === 'Delayed').length;
 
-  if (loading) return <div className="p-4 text-center text-gray-500">Loading shipments...</div>;
+  function handleStatusChange(id: string, status: string) {
+    onUpdateStatus(id, status as ShipmentStatus);
+    setSelected(prev => prev?.id === id ? { ...prev, status: status as ShipmentStatus } : prev);
+  }
+
+  function handleDeleteConfirm() {
+    if (deleteTarget) {
+      onDelete(deleteTarget.id);
+      setDeleteTarget(null);
+      // If the deleted shipment was open in the detail panel, close it
+      if (selected?.id === deleteTarget.id) setSelected(null);
+    }
+  }
 
   return (
     <div className="p-4">
-      {/* Add Shipment Modal */}
-      {showAdd && <AddShipmentModal onClose={() => setShowAdd(false)} onAdd={s => { addShipment(s); setShowAdd(false); }} />}
+      {showAdd && <AddShipmentModal onClose={() => setShowAdd(false)} onAdd={s => { onAdd(s); setShowAdd(false); }} />}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirmation modal */}
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={e => { if (e.target === e.currentTarget) setDeleteTarget(null); }}>
           <div className="bg-white rounded-xl shadow-xl w-96 p-5">
@@ -96,14 +59,24 @@ export default function ShipmentsPage() {
               Are you sure you want to delete shipment <span className="font-semibold">{deleteTarget.blNumber}</span>? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setDeleteTarget(null)} className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-700 hover:bg-gray-50">Cancel</button>
-              <button onClick={() => deleteShipment(deleteTarget.id)} className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700">Delete</button>
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-medium hover:bg-red-700"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Shipment Detail Modal (unchanged from your original) */}
+      {/* Existing detail modal – unchanged */}
       {selected && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}>
           <div className="bg-white rounded-xl shadow-xl w-[500px] max-h-[85vh] overflow-y-auto p-5">
@@ -111,6 +84,7 @@ export default function ShipmentsPage() {
               <h3 className="text-sm font-semibold text-gray-900">{selected.blNumber} — {selected.origin} → {selected.destination}</h3>
               <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
             </div>
+            {/* ... rest of the detail panel content – unchanged ... */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               {[['Transporter', selected.transporter || '—'], ['Driver', selected.driver || '—'], ['ETA', selected.eta || '—'], ['Weight', selected.weight || '—'], ['Containers', selected.containers || '—'], ['Detention', selected.detentionCost > 0 ? `$${selected.detentionCost.toLocaleString()}` : 'None']].map(([l, v]) => (
                 <div key={l} className="bg-gray-50 rounded-lg p-2">
@@ -125,7 +99,7 @@ export default function ShipmentsPage() {
               <select
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 value={selected.status}
-                onChange={e => updateShipmentStatus(selected.id, e.target.value as ShipmentStatus)}
+                onChange={e => handleStatusChange(selected.id, e.target.value)}
               >
                 {STATUSES.map(st => <option key={st}>{st}</option>)}
               </select>
@@ -184,7 +158,10 @@ export default function ShipmentsPage() {
           <div className="text-sm font-semibold text-gray-900">Shipments</div>
           <div className="text-xs text-gray-500 mt-0.5">{shipments.length} total &middot; {delayed} delayed</div>
         </div>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F4C81] text-white rounded-lg text-xs font-medium hover:bg-[#0d3f6b] transition-colors">
+        <button
+          onClick={() => setShowAdd(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0F4C81] text-white rounded-lg text-xs font-medium hover:bg-[#0d3f6b] transition-colors"
+        >
           <i className="ti ti-plus text-sm" /> Add Shipment
         </button>
       </div>
@@ -245,10 +222,16 @@ export default function ShipmentsPage() {
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <button onClick={() => setSelected(s)} className="flex items-center gap-1 text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors">
+                      <button
+                        onClick={() => setSelected(s)}
+                        className="flex items-center gap-1 text-xs text-blue-600 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
                         <i className="ti ti-file-text text-xs" /> Details
                       </button>
-                      <button onClick={() => setDeleteTarget(s)} className="flex items-center gap-1 text-xs text-red-600 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">
+                      <button
+                        onClick={() => setDeleteTarget(s)}
+                        className="flex items-center gap-1 text-xs text-red-600 border border-red-200 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                      >
                         <i className="ti ti-trash text-xs" /> Delete
                       </button>
                     </div>

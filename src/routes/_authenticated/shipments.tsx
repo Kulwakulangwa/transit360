@@ -1,6 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
-import ShipmentsPage from '../pages/Shipments';
+import { Shipments } from '@/pages/Shipments';
+import { useShipments, useShipmentMutations } from '@/hooks/useData';
 
 export const Route = createFileRoute('/_authenticated/shipments')({
-  component: ShipmentsPage,
+  component: () => {
+    const m = useShipmentMutations();
+    return (
+      <Shipments
+        shipments={useShipments()}
+        onAdd={m.addShipment}
+        onUpdateStatus={m.updateShipmentStatus}
+        onDelete={m.deleteShipment}   // <-- add this line
+      />
+    );
+  },
 });
